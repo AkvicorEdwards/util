@@ -7,6 +7,7 @@
 - [x] CRC32 (text/file)
 - [x] MD5 (text/file)
 - [x] SHA256 (text/file)
+- [x] terminal multi-line input/edit
 
 # Installation
 
