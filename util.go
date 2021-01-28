@@ -50,6 +50,7 @@ func BitSet(b interface{}, bit byte, set bool) {
 	}
 }
 
+// ori: Original content. Split with newline
 func Input(ori string) string {
 	var (
 		lines []string
@@ -75,21 +76,32 @@ func Input(ori string) string {
 		input, _, _ = reader.ReadLine()
 		switch string(input) {
 		case "e", "edit":
+			if len(lines) == 0 {
+				fmt.Println("No editable rows")
+				continue
+			}
 			fmt.Print("Enter line number: ")
 			input, _, err = reader.ReadLine()
 			if err != nil {
 				fmt.Println("Illegal input")
 				continue
 			}
-			line, err = strconv.Atoi(string(input))
-			if err != nil {
-				fmt.Println("Illegal input")
-				continue
+			if len(input) == 0 {
+				line = len(lines)-1
+			} else {
+				line, err = strconv.Atoi(string(input))
+				if err != nil {
+					fmt.Println("Illegal input")
+					continue
+				}
+				if line < 0 {
+					line = 0
+				}
+				if line >= len(lines) {
+					line = len(lines)-1
+				}
 			}
-			if line < 0 || line >= len(lines) {
-				fmt.Println("Illegal input")
-				continue
-			}
+
 			fmt.Printf("Old: [%s]\n", lines[line])
 			fmt.Print("New: ")
 			input, _, err = reader.ReadLine()
@@ -116,9 +128,23 @@ func Input(ori string) string {
 				fmt.Println("Illegal input")
 				continue
 			}
-			line, err = strconv.Atoi(string(input))
+			if len(input) == 0 {
+				line = len(lines)
+			} else {
+				line, err = strconv.Atoi(string(input))
+				if err != nil {
+					fmt.Println("Illegal input")
+					continue
+				}
+			}
+			fmt.Printf("Line number: [%d]\n", line)
+			fmt.Println("Y/n")
+			input, _, err = reader.ReadLine()
 			if err != nil {
 				fmt.Println("Illegal input")
+				continue
+			}
+			if string(input) == "n" || string(input) == "N" {
 				continue
 			}
 			if line < 1 {
@@ -142,6 +168,15 @@ func Input(ori string) string {
 			}
 			if line < 0 || line >= len(lines) {
 				fmt.Println("Illegal input")
+				continue
+			}
+			fmt.Println("Y/n")
+			input, _, err = reader.ReadLine()
+			if err != nil {
+				fmt.Println("Illegal input")
+				continue
+			}
+			if string(input) == "n" || string(input) == "N" {
 				continue
 			}
 			lines = append(lines[:line], lines[line+1:]...)
@@ -180,6 +215,16 @@ func Input(ori string) string {
 				fmt.Println("Illegal input")
 				continue
 			}
+			fmt.Printf("SWAP: [%d] [%d]\n", line1, line2)
+			fmt.Println("Y/n")
+			input, _, err = reader.ReadLine()
+			if err != nil {
+				fmt.Println("Illegal input")
+				continue
+			}
+			if string(input) == "n" || string(input) == "N" {
+				continue
+			}
 			lt := lines[line1]
 			lines[line1] = lines[line2]
 			lines[line2] = lt
@@ -197,6 +242,15 @@ func Input(ori string) string {
 		case "q", "quit":
 			fmt.Println("Your input:")
 			pri()
+			fmt.Println("Y/n")
+			input, _, err = reader.ReadLine()
+			if err != nil {
+				fmt.Println("Illegal input")
+				continue
+			}
+			if string(input) == "n" || string(input) == "N" {
+				continue
+			}
 			res := strings.TrimSpace(lines[0])
 			lines = lines[1:]
 			for _, v := range lines {
