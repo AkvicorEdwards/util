@@ -101,7 +101,7 @@ func Input(ori string) string {
 					line = len(lines)-1
 				}
 			}
-
+			fmt.Printf("Line: [%d]\n", line)
 			fmt.Printf("Old: [%s]\n", lines[line])
 			fmt.Print("New: ")
 			input, _, err = reader.ReadLine()
@@ -170,6 +170,7 @@ func Input(ori string) string {
 				fmt.Println("Illegal input")
 				continue
 			}
+			fmt.Printf("Line: [%d]\n", line)
 			fmt.Println("Y/n")
 			input, _, err = reader.ReadLine()
 			if err != nil {
