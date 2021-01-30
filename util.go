@@ -263,3 +263,18 @@ func Input(ori string) string {
 		}
 	}
 }
+
+//	0: File not exist
+//	1: File is directory
+//	2: File is file
+func FileStat(filename string) int {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return 0
+	}
+	if info.IsDir() {
+		return 1
+	} else {
+		return 2
+	}
+}

@@ -19,6 +19,10 @@ func SHA256File(filePath string) ([32]byte, error) {
 			log.Print(err)
 		}
 	}()
+	return SHA256FileIO(file)
+}
+
+func SHA256FileIO(file *os.File) ([32]byte, error) {
 	hash := sha256.New()
 	if _, err := io.Copy(hash, file); err != nil {
 		return [32]byte{}, err

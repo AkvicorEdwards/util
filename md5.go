@@ -19,6 +19,10 @@ func MD5File(filePath string) ([16]byte, error) {
 			log.Print(err)
 		}
 	}()
+	return MD5FileIO(file)
+}
+
+func MD5FileIO(file *os.File) ([16]byte, error) {
 	hash := md5.New()
 	if _, err := io.Copy(hash, file); err != nil {
 		return [16]byte{}, err
