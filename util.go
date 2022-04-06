@@ -4,9 +4,12 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"math/rand"
 	"os"
+	"path"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func BytesCombine(pBytes ...[]byte) []byte {
@@ -55,8 +58,8 @@ func Input(ori string) string {
 	var (
 		lines []string
 		input []byte
-		line int
-		err error
+		line  int
+		err   error
 	)
 	sc := bufio.NewScanner(strings.NewReader(ori))
 	for sc.Scan() {
@@ -87,7 +90,7 @@ func Input(ori string) string {
 				continue
 			}
 			if len(input) == 0 {
-				line = len(lines)-1
+				line = len(lines) - 1
 			} else {
 				line, err = strconv.Atoi(string(input))
 				if err != nil {
@@ -98,7 +101,7 @@ func Input(ori string) string {
 					line = 0
 				}
 				if line >= len(lines) {
-					line = len(lines)-1
+					line = len(lines) - 1
 				}
 			}
 			fmt.Printf("Line: [%d]\n", line)
@@ -277,4 +280,42 @@ func FileStat(filename string) int {
 	} else {
 		return 2
 	}
+}
+
+func SplitPath(p string) (head, tail string) {
+	p = path.Clean("/" + p)
+	i := strings.Index(p[1:], "/") + 1
+	if i <= 0 {
+		return p[1:], "/"
+	}
+	return p[1:i], p[i:]
+}
+
+func RandomString(length int, str ...string) string {
+	chars := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	if len(str) != 0 {
+		chars = ""
+		for _, v := range str {
+			chars += v
+		}
+	}
+	charsLen := len(chars)
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	res := make([]byte, length)
+	for i := range res {
+		res[i] = chars[r.Intn(charsLen)]
+	}
+	return string(res)
+}
+
+func RandomStringWithTimestamp(length int) string {
+	if length < 7 {
+		length = 7
+	}
+	nowStampStr := strconv.FormatInt(time.Now().Unix(), 36)
+	fill := make([]byte, 7-len(nowStampStr))
+	for i := range fill {
+		fill[i] = '0'
+	}
+	return string(fill) + nowStampStr + RandomString(length-7)
 }

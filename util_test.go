@@ -73,3 +73,52 @@ func ExampleBitSet() {
 	// 2
 	// e
 }
+
+func ExampleSplitPath() {
+	var head, tail string
+	head, tail = SplitPath("/123/akvicor")
+	fmt.Printf("[%s, %s]\n", head, tail)
+
+	head, tail = SplitPath("123/akvicor")
+	fmt.Printf("[%s, %s]\n", head, tail)
+
+	head, tail = SplitPath("/akvicor")
+	fmt.Printf("[%s, %s]\n", head, tail)
+
+	head, tail = SplitPath("akvicor")
+	fmt.Printf("[%s, %s]\n", head, tail)
+
+	head, tail = SplitPath("/")
+	fmt.Printf("[%s, %s]\n", head, tail)
+
+	head, tail = SplitPath("")
+	fmt.Printf("[%s, %s]\n", head, tail)
+
+	// Output:
+	// [123, /akvicor]
+	// [123, /akvicor]
+	// [akvicor, /]
+	// [akvicor, /]
+	// [, /]
+	// [, /]
+}
+
+func ExampleRandomString() {
+	fmt.Printf("[%s]\n", RandomString(0, "a"))
+	fmt.Printf("[%s]\n", RandomString(0, "abc"))
+	fmt.Printf("[%s]\n", RandomString(1, "b"))
+	fmt.Printf("[%s]\n", RandomString(7, "a"))
+	fmt.Printf("[%s]\n", RandomString(0, "a", "b"))
+
+	// Output:
+	// []
+	// []
+	// [b]
+	// [aaaaaaa]
+	// [bbbbbbbb]
+	// []
+}
+
+func ExampleRandomStringWithTimestamp() {
+	fmt.Printf("[%s]\n", RandomStringWithTimestamp(1))
+}
