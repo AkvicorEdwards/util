@@ -120,5 +120,8 @@ func ExampleRandomString() {
 }
 
 func ExampleRandomStringWithTimestamp() {
-	fmt.Printf("[%s]\n", RandomStringWithTimestamp(1))
+	rstr := RandomStringWithTimestamp(17)
+	fmt.Printf("[%s]\n", rstr)
+	date, str := ParseRandomStringWithTimestamp(rstr)
+	fmt.Printf("[%d][%s]\n", date, str)
 }

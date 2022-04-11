@@ -319,3 +319,14 @@ func RandomStringWithTimestamp(length int) string {
 	}
 	return string(fill) + nowStampStr + RandomString(length-7)
 }
+
+func ParseRandomStringWithTimestamp(str string) (int64, string) {
+	if len(str) < 7 {
+		return 0, ""
+	}
+	date, err := strconv.ParseInt(string([]byte(str)[:7]), 36, 64)
+	if err != nil {
+		return 0, ""
+	}
+	return date, string([]byte(str)[7:])
+}
