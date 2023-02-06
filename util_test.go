@@ -1,6 +1,8 @@
 package util
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func ExampleBytesCombine() {
 	bs1 := []byte{11, 22}
@@ -74,27 +76,6 @@ func ExampleBitSet() {
 	// e
 }
 
-func ExampleSplitPath() {
-	test := func(s string) {
-		head, tail := SplitPath(s)
-		fmt.Printf("s[%s] -> [%s, %s]\n", s, head, tail)
-	}
-	test("/123/akvicor")
-	test("123/akvicor")
-	test("/akvicor")
-	test("akvicor")
-	test("/")
-	test("")
-
-	// Output:
-	// s[/123/akvicor] -> [/123, /akvicor]
-	// s[123/akvicor] -> [/123, /akvicor]
-	// s[/akvicor] -> [/akvicor, ]
-	// s[akvicor] -> [/akvicor, ]
-	// s[/] -> [/, ]
-	// s[] -> [/, ]
-}
-
 func ExampleSplitPathSkip() {
 	test := func(s string, skip int) {
 		head, tail := SplitPathSkip(s, skip)
@@ -143,6 +124,79 @@ func ExampleSplitPathSkip() {
 	// s[url/] skip[1] -> [/url, ]
 	// s[/url/] skip[0] -> [/url, ]
 	// s[/url/] skip[1] -> [/url, ]
+}
+
+func ExampleSplitPath() {
+	test := func(s string) {
+		head, tail := SplitPath(s)
+		fmt.Printf("s[%s] -> [%s, %s]\n", s, head, tail)
+	}
+	test("/123/akvicor")
+	test("123/akvicor")
+	test("/akvicor")
+	test("akvicor")
+	test("/")
+	test("")
+
+	// Output:
+	// s[/123/akvicor] -> [/123, /akvicor]
+	// s[123/akvicor] -> [/123, /akvicor]
+	// s[/akvicor] -> [/akvicor, ]
+	// s[akvicor] -> [/akvicor, ]
+	// s[/] -> [/, ]
+	// s[] -> [/, ]
+}
+
+func ExampleSplitPathRepeat() {
+	test := func(s string, repeat int) {
+		head, tail := SplitPathRepeat(s, repeat)
+		fmt.Printf("s[%s] repeat[%d] -> [%s, %s]\n", s, repeat, head, tail)
+	}
+	s := "/1/23/456/7/"
+	test(s, 0)
+	test(s, 1)
+	test(s, 2)
+	test(s, 3)
+	test(s, 4)
+	test(s, 5)
+	s = ""
+	test(s, 0)
+	test(s, 1)
+	s = "/"
+	test(s, 0)
+	test(s, 1)
+	s = "url"
+	test(s, 0)
+	test(s, 1)
+	s = "/url"
+	test(s, 0)
+	test(s, 1)
+	s = "url/"
+	test(s, 0)
+	test(s, 1)
+	s = "/url/"
+	test(s, 0)
+	test(s, 1)
+
+	// Output:
+	// s[/1/23/456/7/] repeat[0] -> [/1, /23/456/7]
+	// s[/1/23/456/7/] repeat[1] -> [/23, /456/7]
+	// s[/1/23/456/7/] repeat[2] -> [/456, /7]
+	// s[/1/23/456/7/] repeat[3] -> [/7, ]
+	// s[/1/23/456/7/] repeat[4] -> [/, ]
+	// s[/1/23/456/7/] repeat[5] -> [/, ]
+	// s[] repeat[0] -> [/, ]
+	// s[] repeat[1] -> [/, ]
+	// s[/] repeat[0] -> [/, ]
+	// s[/] repeat[1] -> [/, ]
+	// s[url] repeat[0] -> [/url, ]
+	// s[url] repeat[1] -> [/, ]
+	// s[/url] repeat[0] -> [/url, ]
+	// s[/url] repeat[1] -> [/, ]
+	// s[url/] repeat[0] -> [/url, ]
+	// s[url/] repeat[1] -> [/, ]
+	// s[/url/] repeat[0] -> [/url, ]
+	// s[/url/] repeat[1] -> [/, ]
 }
 
 func ExampleRandomString() {

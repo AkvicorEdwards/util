@@ -3,6 +3,8 @@ package util
 import (
 	"bytes"
 	"math/rand"
+	"net"
+	"net/http"
 	"os"
 	"path"
 	"strconv"
@@ -67,7 +69,7 @@ func FileStat(filename string) int {
 }
 
 func SplitPathSkip(p string, skip int) (head, tail string) {
-	p = path.Clean("/" + p)
+	p = path.Clean("/" + p + "/")
 	fin := 0
 	cur := 0
 	for skip >= 0 {
@@ -75,7 +77,7 @@ func SplitPathSkip(p string, skip int) (head, tail string) {
 		if fin+1 >= len(p) {
 			return p, ""
 		}
-		cur = strings.Index(p[fin+1:], "/")
+		cur = strings.IndexByte(p[fin+1:], '/')
 		if cur < 0 {
 			return p, ""
 		}
@@ -85,7 +87,21 @@ func SplitPathSkip(p string, skip int) (head, tail string) {
 }
 
 func SplitPath(p string) (head, tail string) {
+	p = path.Clean("/" + p + "/")
 	return SplitPathSkip(p, 0)
+}
+
+func SplitPathRepeat(p string, repeat int) (head, tail string) {
+	p = path.Clean("/" + p + "/")
+	head, tail = SplitPathSkip(p, repeat)
+	c := strings.Count(head, "/") - 1
+	if c == repeat {
+		i := strings.LastIndexByte(head, '/')
+		return head[i:], tail
+	} else if c < repeat {
+		return "/", ""
+	}
+	return head, tail
 }
 
 func RandomString(length int, str ...string) string {
@@ -126,4 +142,29 @@ func ParseRandomStringWithTimestamp(str string) (int64, string) {
 		return 0, ""
 	}
 	return date, string([]byte(str)[7:])
+}
+
+func GetIP(r *http.Request) string {
+	ip := r.Header.Get("X-Real-IP")
+	if net.ParseIP(ip) != nil {
+		return ip
+	}
+
+	ip = r.Header.Get("X-Forward-For")
+	for _, i := range strings.Split(ip, ",") {
+		if net.ParseIP(i) != nil {
+			return i
+		}
+	}
+
+	ip, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		return "unknown"
+	}
+
+	if net.ParseIP(ip) != nil {
+		return ip
+	}
+
+	return "unknown"
 }
