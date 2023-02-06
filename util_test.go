@@ -75,32 +75,74 @@ func ExampleBitSet() {
 }
 
 func ExampleSplitPath() {
-	var head, tail string
-	head, tail = SplitPath("/123/akvicor")
-	fmt.Printf("[%s, %s]\n", head, tail)
-
-	head, tail = SplitPath("123/akvicor")
-	fmt.Printf("[%s, %s]\n", head, tail)
-
-	head, tail = SplitPath("/akvicor")
-	fmt.Printf("[%s, %s]\n", head, tail)
-
-	head, tail = SplitPath("akvicor")
-	fmt.Printf("[%s, %s]\n", head, tail)
-
-	head, tail = SplitPath("/")
-	fmt.Printf("[%s, %s]\n", head, tail)
-
-	head, tail = SplitPath("")
-	fmt.Printf("[%s, %s]\n", head, tail)
+	test := func(s string) {
+		head, tail := SplitPath(s)
+		fmt.Printf("s[%s] -> [%s, %s]\n", s, head, tail)
+	}
+	test("/123/akvicor")
+	test("123/akvicor")
+	test("/akvicor")
+	test("akvicor")
+	test("/")
+	test("")
 
 	// Output:
-	// [123, /akvicor]
-	// [123, /akvicor]
-	// [akvicor, /]
-	// [akvicor, /]
-	// [, /]
-	// [, /]
+	// s[/123/akvicor] -> [/123, /akvicor]
+	// s[123/akvicor] -> [/123, /akvicor]
+	// s[/akvicor] -> [/akvicor, ]
+	// s[akvicor] -> [/akvicor, ]
+	// s[/] -> [/, ]
+	// s[] -> [/, ]
+}
+
+func ExampleSplitPathSkip() {
+	test := func(s string, skip int) {
+		head, tail := SplitPathSkip(s, skip)
+		fmt.Printf("s[%s] skip[%d] -> [%s, %s]\n", s, skip, head, tail)
+	}
+	s := "/1/23/456/7/"
+	test(s, 0)
+	test(s, 1)
+	test(s, 2)
+	test(s, 3)
+	test(s, 4)
+	s = ""
+	test(s, 0)
+	test(s, 1)
+	s = "/"
+	test(s, 0)
+	test(s, 1)
+	s = "url"
+	test(s, 0)
+	test(s, 1)
+	s = "/url"
+	test(s, 0)
+	test(s, 1)
+	s = "url/"
+	test(s, 0)
+	test(s, 1)
+	s = "/url/"
+	test(s, 0)
+	test(s, 1)
+
+	// Output:
+	// s[/1/23/456/7/] skip[0] -> [/1, /23/456/7]
+	// s[/1/23/456/7/] skip[1] -> [/1/23, /456/7]
+	// s[/1/23/456/7/] skip[2] -> [/1/23/456, /7]
+	// s[/1/23/456/7/] skip[3] -> [/1/23/456/7, ]
+	// s[/1/23/456/7/] skip[4] -> [/1/23/456/7, ]
+	// s[] skip[0] -> [/, ]
+	// s[] skip[1] -> [/, ]
+	// s[/] skip[0] -> [/, ]
+	// s[/] skip[1] -> [/, ]
+	// s[url] skip[0] -> [/url, ]
+	// s[url] skip[1] -> [/url, ]
+	// s[/url] skip[0] -> [/url, ]
+	// s[/url] skip[1] -> [/url, ]
+	// s[url/] skip[0] -> [/url, ]
+	// s[url/] skip[1] -> [/url, ]
+	// s[/url/] skip[0] -> [/url, ]
+	// s[/url/] skip[1] -> [/url, ]
 }
 
 func ExampleRandomString() {

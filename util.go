@@ -282,13 +282,28 @@ func FileStat(filename string) int {
 	}
 }
 
-func SplitPath(p string) (head, tail string) {
+func SplitPathSkip(p string, skip int) (head, tail string) {
 	p = path.Clean("/" + p)
-	i := strings.Index(p[1:], "/") + 1
-	if i <= 0 {
-		return p[1:], "/"
+	fin := 0
+	cur := 0
+	for skip >= 0 {
+		skip--
+		if fin+1 >= len(p) {
+			return p, ""
+		}
+		//fmt.Printf("\n		[%s]	fin[%d] cur[%d] str[%s][%s]", p, fin, cur, p[:fin], p[fin:])
+		cur = strings.Index(p[fin+1:], "/")
+		if cur < 0 {
+			return p, ""
+		}
+		fin += cur + 1
+		//fmt.Printf(" -> fin[%d] cur[%d] str[%s][%s]", fin, cur, p[:fin], p[fin:])
 	}
-	return p[1:i], p[i:]
+	return p[:fin], p[fin:]
+}
+
+func SplitPath(p string) (head, tail string) {
+	return SplitPathSkip(p, 0)
 }
 
 func RandomString(length int, str ...string) string {
