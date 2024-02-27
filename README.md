@@ -9,18 +9,25 @@ import "github.com/AkvicorEdwards/util"
 - [x] SHA1 (File, reader, string, bytes)
 - [x] SHA256 (File, reader, string, bytes)
 - [x] SHA512 (File, reader, string, bytes)
+- [x] AES (CBC)
 - [x] Base64
 - [x] bytes to int (uint16, uint32, uint64)
 - [x] int to bytes (uint16, uint32, uint64)
 - [x] Bytes Combine
 - [x] Bit Set
 - [x] JSON
+- [x] Slice Remove Duplicates
 - [x] File Stat
+- [x] Dir List
+- [x] Mkdir
+- [x] Dir Size
+- [x] Size Unit, Decimal System and Binary System
 - [x] Path Split
-- [x] Random String
+- [x] Random String, Key
 - [x] IP
 - [x] Time Calculate
 - [x] Tcp Port Checker
+- [x] Port
 - [x] Get Client IP & HTTP GET/POST/PUT Request & HTTP Response & Redirect
 
 # CRC32 & MD5 & SHA1 & SHA256 & SHA512
@@ -64,6 +71,24 @@ fmt.Println(cp.Result().Value())
 - `.WriteBytes()` 写入`[]byte`
 - `.WriteString()` 写入`string`
 - `.Result()` 获取计算结果
+
+# AES
+
+- 计算结果为`*AESResult`类型，可通过以下方法获取不同类型结果
+- `.Bytes() []byte`
+- `.Base64() *Base64Result`
+- `.String() string`
+- `.Upper() string`
+- `.Lower() string`
+- `.Encrypted() bool`
+- `.Decrypt(key []byte, iv ...[]byte) *AESResult`
+- `.Encrypt(key []byte, iv ...[]byte) *AESResult`
+- `.Error() error` 获取计算过程中产生的错误
+
+## NewAESResult()
+
+- `.EncryptCBC(origData, key []byte, iv ...[]byte) *AESResult`
+- `.DecryptCBC(encrypted, key []byte, iv ...[]byte) *AESResult`
 
 # Base64
 
@@ -130,20 +155,99 @@ fmt.Println(NewJSONResult([]byte(`{"name":"Akvicor","age":17}`)).Map())
 - `.MapArray() []map[string]any` 返回json数组，如果变量中保存的是json对象，自动创建一个数组并将变量作为数组第一个元素
 - `.Error() error` 获取计算过程中产生的错误
 
+# Slice Remove Duplicates
+
+Slice去除重复元素
+
+- `NewRemoveDuplicates() *RemoveDuplicates`
+- `.String(s []string) []string`
+- `.Byte(s []byte) []byte`
+- `.Int8(s []int8) []int8`
+- `.Int16(s []int16) []int16`
+- `.Int(s []int) []int`
+- `.Int32(s []int32) []int32`
+- `.Int64(s []int64) []int64`
+- `.UInt8(s []uint8) []uint8`
+- `.UInt16(s []uint16) []uint16`
+- `.UInt(s []uint) []uint`
+- `.UInt32(s []uint32) []uint32`
+- `.UInt64(s []uint64) []uint64`
+- `.Float32(s []float32) []float32`
+- `.Float64(s []float64) []float64`
+
 # File Stat
 
 判断文件类型（不存在，是文件夹，是文件
 
 ```go
-FileStat(filename string) int
+FileStat(filename string) *FileStatModel
 ```
 
-通过以下常量和返回值确定文件类型
+通过以下函数确定文件类型
 
 ```go
-FileStatNotExist = 0
-FileStatIsDir    = 1
-FileStatIsFile   = 2
+IsFile()
+NotFile()
+IsDir()
+NotDir()
+IsExist()
+NotExist()
+IsDenied()
+NotDenied()
+IsError()
+NotError()
+```
+
+# Dir List
+
+获取文件列表
+
+```go
+DirList(p string) *DirListModel
+
+type DirListModel struct {
+    Files []DirListUnitModel
+    Dirs  []DirListUnitModel
+    Error error
+}
+
+type DirListUnitModel struct {
+    Name    string
+    Size    int64
+    Mode    fs.FileMode
+    ModTime time.Time
+}
+```
+
+# Mkdir
+
+创建文件夹
+
+```go
+MkdirP(p string, perm ...os.FileMode) error
+```
+
+# Mkdir
+
+获取文件夹大小
+
+```go
+DirSize(p string) (int64, error)
+```
+
+# Size Unit, Decimal System and Binary System
+
+将大小单位`B`转换为`K,M,G,T,P,E`，并支持返回格式化后的字符串
+
+- 以`KiB,MiB,GiB,TiB,PiB,EiB`为单位（1024进制
+- 以`KB,MB,GB,TB,PB,EB`为单位（1000进制
+- 以`K,M,G,T,P,E`为单位(转换为`iB`或`B`时，按照1024进制处理
+- 将B单位的值格式化到各个单位（如`1025B`返回`1KiB 1B`，返回`string`或`[]*SizeFormatModel`
+- 截取最大的单位的大小（如1M2B返回1M
+
+```go
+Size(1*SizeB + 2*SizeKiB).Format(",", true)
+Size(1*SizeB + 2*SizeKB).Format(",", true)
 ```
 
 # Path Split
@@ -154,7 +258,7 @@ FileStatIsFile   = 2
 - `SplitPath(p string) (head, tail string)` 在第一个`/`处分割，且`/`保留在tail中
 - `SplitPathRepeat(p string, repeat int) (head, tail string)` 在第一个`/`处分割，且`/`保留在tail中，将tail作为参数再次分割，重复repeat次
 
-# Random String
+# Random String, Key
 
 返回随机字符串
 
@@ -174,6 +278,15 @@ FileStatIsFile   = 2
 - `RandomStringAtLeastOnce(length int, str ...string)` 每种类型至少包含一个，每个str元素为一个类型，默认通过`RandomSlice`生成，也可通过传入str来自定义
 - `RandomStringWithTimestamp(length int, unix ...int64)` 长度至少为8，返回包含时间戳的随机字符串
 - `ParseRandomStringWithTimestamp(str string) (int64, string)` 解析包含时间戳的随机字符串
+- `RandomKey(l int) *KeyResult` 生成一个长度为l的key的byte数组, 返回包含key的结构体
+- `KeyResultFromHexString(hx string) *KeyResult` 解析hex字符串，转换为KeyResult
+
+KeyResult下的方法
+
+- `.Bytes` 返回key的byte数组
+- `.Upper` 返回hex后的大写字符串，长度为Bytes的两倍
+- `.Lower` 返回hex后的小写字符串，长度为Bytes的两倍
+- `.Error`
 
 # IP
 
@@ -184,6 +297,7 @@ FileStatIsFile   = 2
 - `Uint32ToIPAddr` uint32转为ip地址
 - `IPToUint32` ip转为uint32
 - `Uint32ToIP` uint32转为ip
+- `GetLocalIp` 获取本地IP
 
 # Time Calculate
 
@@ -208,6 +322,12 @@ FileStatIsFile   = 2
 
 - `TcpPortIsOpen(ip, port string)`
 - `TcpPortIsOpenByAddr(ipPort string)`
+
+# Port
+
+获取可用端口
+
+- `GetAvailablePort() (int, error)`
 
 # Get Client IP & HTTP GET/POST/PUT Request & HTTP Response & Redirect
 
@@ -238,7 +358,17 @@ FileStatIsFile   = 2
 Content Type
 
 - `HTTPContentTypeUrlencoded`
+- `HTTPContentTypeUrlencodedUTF8`
 - `HTTPContentTypeJson`
+- `HTTPContentTypeJsonUTF8`
+- `HTTPContentTypeXml`
+- `HTTPContentTypeXmlUTF8`
+- `HTTPContentTypePlain`
+- `HTTPContentTypePlainUTF8`
+- `HTTPContentTypeHtml`
+- `HTTPContentTypeHtmlUTF8`
+- `HTTPContentTypeFormData`
+- `HTTPContentTypeFormDataUTF8`
 
 方法
 
