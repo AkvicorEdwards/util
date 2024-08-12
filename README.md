@@ -1,4 +1,4 @@
-# Util
+# Go Util
 
 ```go
 import "github.com/AkvicorEdwards/util"
