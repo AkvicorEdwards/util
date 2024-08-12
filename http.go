@@ -3,6 +3,7 @@ package util
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -190,9 +191,9 @@ const (
 	HTTPContentTypeUrlencoded     = "application/x-www-form-urlencoded"
 	HTTPContentTypeUrlencodedUTF8 = "application/x-www-form-urlencoded; charset=utf-8"
 	HTTPContentTypeJson           = "application/json"
-	HTTPContentTypeJsonUTF8       = "application/json; charset=UTF-8"
+	HTTPContentTypeJsonUTF8       = "application/json; charset=utf-8"
 	HTTPContentTypeXml            = "application/xml"
-	HTTPContentTypeXmlUTF8        = "application/xml; charset=UTF-8"
+	HTTPContentTypeXmlUTF8        = "application/xml; charset=utf-8"
 	HTTPContentTypePlain          = "text/plain"
 	HTTPContentTypePlainUTF8      = "text/plain; charset=utf-8"
 	HTTPContentTypeHtml           = "text/html"
@@ -201,11 +202,11 @@ const (
 	HTTPContentTypeFormDataUTF8   = "multipart/form-data; charset=utf-8"
 )
 
-func HttpGet(u string, args any, contentType string, header map[string]string) []byte {
+func HttpGet(u string, args any, contentType string, header map[string]string) ([]byte, error) {
 	arg := NewJSON(args, false).Map()
 	req, err := http.NewRequest("GET", u, nil)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	q := req.URL.Query()
 	for k, v := range arg {
@@ -215,7 +216,9 @@ func HttpGet(u string, args any, contentType string, header map[string]string) [
 	if header == nil {
 		header = make(map[string]string)
 	}
-	header["Content-Type"] = contentType
+	if len(contentType) > 0 {
+		header["Content-Type"] = contentType
+	}
 	for k, v := range header {
 		req.Header.Set(k, v)
 	}
@@ -223,22 +226,22 @@ func HttpGet(u string, args any, contentType string, header map[string]string) [
 	client := &http.Client{}
 	rsp, err := client.Do(req)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	defer rsp.Body.Close()
 
 	body, err := io.ReadAll(rsp.Body)
 	if err != nil {
-		return nil
+		return nil, err
 	}
-	return body
+	return body, nil
 }
 
-func HttpPost(u string, args any, contentType string, header map[string]string) []byte {
+func HttpPost(u string, args any, contentType string, header map[string]string) ([]byte, error) {
 	var req *http.Request
 	var err error
 
-	if contentType == HTTPContentTypeUrlencoded {
+	if contentType == HTTPContentTypeUrlencoded || contentType == HTTPContentTypeUrlencodedUTF8 {
 		arg := NewJSON(args, false).Map()
 		payload := url.Values{}
 		for k, v := range arg {
@@ -246,20 +249,22 @@ func HttpPost(u string, args any, contentType string, header map[string]string) 
 		}
 		req, err = http.NewRequest("POST", u, strings.NewReader(payload.Encode()))
 		if err != nil {
-			return nil
+			return nil, err
 		}
-	} else if contentType == HTTPContentTypeJson {
+	} else if contentType == HTTPContentTypeJson || contentType == HTTPContentTypeJsonUTF8 {
 		req, err = http.NewRequest("POST", u, bytes.NewBuffer(NewJSON(args, false).Bytes()))
 		if err != nil {
-			return nil
+			return nil, err
 		}
 	} else {
-		return nil
+		return nil, errors.New("unknown content type")
 	}
 	if header == nil {
 		header = make(map[string]string)
 	}
-	header["Content-Type"] = contentType
+	if len(contentType) > 0 {
+		header["Content-Type"] = contentType
+	}
 	for k, v := range header {
 		req.Header.Set(k, v)
 	}
@@ -267,22 +272,22 @@ func HttpPost(u string, args any, contentType string, header map[string]string) 
 	client := &http.Client{}
 	rsp, err := client.Do(req)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	defer rsp.Body.Close()
 
 	body, err := io.ReadAll(rsp.Body)
 	if err != nil {
-		return nil
+		return nil, err
 	}
-	return body
+	return body, nil
 }
 
-func HttpPostGet(u string, argsGET, argsPOST any, contentType string, header map[string]string) []byte {
+func HttpPostGet(u string, argsGET, argsPOST any, contentType string, header map[string]string) ([]byte, error) {
 	var req *http.Request
 	var err error
 
-	if contentType == HTTPContentTypeUrlencoded {
+	if contentType == HTTPContentTypeUrlencoded || contentType == HTTPContentTypeUrlencodedUTF8 {
 		arg := NewJSON(argsPOST, false).Map()
 		payload := url.Values{}
 		for k, v := range arg {
@@ -290,20 +295,22 @@ func HttpPostGet(u string, argsGET, argsPOST any, contentType string, header map
 		}
 		req, err = http.NewRequest("POST", u, strings.NewReader(payload.Encode()))
 		if err != nil {
-			return nil
+			return nil, err
 		}
-	} else if contentType == HTTPContentTypeJson {
+	} else if contentType == HTTPContentTypeJson || contentType == HTTPContentTypeJsonUTF8 {
 		req, err = http.NewRequest("POST", u, bytes.NewBuffer(NewJSON(argsPOST, false).Bytes()))
 		if err != nil {
-			return nil
+			return nil, err
 		}
 	} else {
-		return nil
+		return nil, errors.New("unknown content type")
 	}
 	if header == nil {
 		header = make(map[string]string)
 	}
-	header["Content-Type"] = contentType
+	if len(contentType) > 0 {
+		header["Content-Type"] = contentType
+	}
 	for k, v := range header {
 		req.Header.Set(k, v)
 	}
@@ -318,13 +325,13 @@ func HttpPostGet(u string, argsGET, argsPOST any, contentType string, header map
 	client := &http.Client{}
 	rsp, err := client.Do(req)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	defer rsp.Body.Close()
 
 	body, err := io.ReadAll(rsp.Body)
 	if err != nil {
-		return nil
+		return nil, err
 	}
-	return body
+	return body, nil
 }

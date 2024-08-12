@@ -5,6 +5,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"encoding/hex"
+	"errors"
 	"strings"
 )
 
@@ -123,6 +124,9 @@ func (*AES) DecryptCBC(encrypted, key []byte, iv ...[]byte) *AESResult {
 	}
 
 	blockSize := block.BlockSize()
+	if len(encrypted)%blockSize != 0 {
+		return NewAESResult(nil, false, errors.New("encrypted data size error"))
+	}
 	var ivi []byte
 	ivb := BytesCombine(iv...)
 	if len(ivb) >= blockSize {
@@ -145,6 +149,13 @@ func pkcs5Padding(ciphertext []byte, blockSize int) []byte {
 
 func pkcs5UnPadding(origData []byte) []byte {
 	length := len(origData)
+	if length == 0 {
+		return origData
+	}
 	unPadding := int(origData[length-1])
-	return origData[:(length - unPadding)]
+	offset := length - unPadding
+	if offset < 0 {
+		offset = 0
+	}
+	return origData[:offset]
 }
